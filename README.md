@@ -1,92 +1,184 @@
-# LangGraph ReAct Agent Template
+# AskCipher — Junior Developer Exercise
 
-[![CI](https://github.com/langchain-ai/react-agent/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/langchain-ai/react-agent/actions/workflows/unit-tests.yml)
-[![Open in - LangGraph Studio](https://img.shields.io/badge/Open_in-LangGraph_Studio-00324d.svg?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NS4zMzMiIGhlaWdodD0iODUuMzMzIiB2ZXJzaW9uPSIxLjAiIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHBhdGggZD0iTTEzIDcuOGMtNi4zIDMuMS03LjEgNi4zLTYuOCAyNS43LjQgMjQuNi4zIDI0LjUgMjUuOSAyNC41QzU3LjUgNTggNTggNTcuNSA1OCAzMi4zIDU4IDcuMyA1Ni43IDYgMzIgNmMtMTIuOCAwLTE2LjEuMy0xOSAxLjhtMzcuNiAxNi42YzIuOCAyLjggMy40IDQuMiAzLjQgNy42cy0uNiA0LjgtMy40IDcuNkw0Ny4yIDQzSDE2LjhsLTMuNC0zLjRjLTQuOC00LjgtNC44LTEwLjQgMC0xNS4ybDMuNC0zLjRoMzAuNHoiLz48cGF0aCBkPSJNMTguOSAyNS42Yy0xLjEgMS4zLTEgMS43LjQgMi41LjkuNiAxLjcgMS44IDEuNyAyLjcgMCAxIC43IDIuOCAxLjYgNC4xIDEuNCAxLjkgMS40IDIuNS4zIDMuMi0xIC42LS42LjkgMS40LjkgMS41IDAgMi43LS41IDIuNy0xIDAtLjYgMS4xLS44IDIuNi0uNGwyLjYuNy0xLjgtMi45Yy01LjktOS4zLTkuNC0xMi4zLTExLjUtOS44TTM5IDI2YzAgMS4xLS45IDIuNS0yIDMuMi0yLjQgMS41LTIuNiAzLjQtLjUgNC4yLjguMyAyIDEuNyAyLjUgMy4xLjYgMS41IDEuNCAyLjMgMiAyIDEuNS0uOSAxLjItMy41LS40LTMuNS0yLjEgMC0yLjgtMi44LS44LTMuMyAxLjYtLjQgMS42LS41IDAtLjYtMS4xLS4xLTEuNS0uNi0xLjItMS42LjctMS43IDMuMy0yLjEgMy41LS41LjEuNS4yIDEuNi4zIDIuMiAwIC43LjkgMS40IDEuOSAxLjYgMi4xLjQgMi4zLTIuMy4yLTMuMi0uOC0uMy0yLTEuNy0yLjUtMy4xLTEuMS0zLTMtMy4zLTMtLjUiLz48L3N2Zz4=)](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/react-agent)
-
-This template showcases a [ReAct agent](https://arxiv.org/abs/2210.03629) implemented using [LangGraph](https://github.com/langchain-ai/langgraph), designed for [LangGraph Studio](https://github.com/langchain-ai/langgraph-studio). ReAct agents are uncomplicated, prototypical agents that can be flexibly extended to many tools.
-
-![Graph view in LangGraph studio UI](./static/studio_ui.png)
-
-The core logic, defined in `src/react_agent/graph.py`, demonstrates a flexible ReAct agent that iteratively reasons about user queries and executes actions, showcasing the power of this approach for complex problem-solving tasks.
-
-## What it does
-
-The ReAct agent:
-
-1. Takes a user **query** as input
-2. Reasons about the query and decides on an action
-3. Executes the chosen action using available tools
-4. Observes the result of the action
-5. Repeats steps 2-4 until it can provide a final answer
-
-By default, it's set up with a basic set of tools, but can be easily extended with custom tools to suit various use cases.
-
-## Getting Started
-
-Assuming you have already [installed LangGraph Studio](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download), to set up:
-
-1. Create a `.env` file.
+## Quick Start
 
 ```bash
+# 1. Clone and set up
 cp .env.example .env
+# Edit .env — add your ANTHROPIC_API_KEY and TAVILY_API_KEY
+
+# 2. Run with Docker
+docker-compose up --build
+
+# 3. Verify
+curl http://localhost:8000/health          # → {"status": "ok"}
+curl http://localhost:8000/docs            # → Swagger UI
+
+# 4. Run tests
+python -m pytest tests/unit_tests/ -v
 ```
 
-2. Define required API keys in your `.env` file.
+**Alternative (no Docker):** `pip install -e ".[dev]"` then `uvicorn api.main:app --reload`
+(You'll need a local Postgres instance with the schema from `init.sql`)
 
-The primary [search tool](./src/react_agent/tools.py) [^1] used is [Tavily](https://tavily.com/). Create an API key [here](https://app.tavily.com/sign-in).
+---
 
-### Setup Model
+## Architecture
 
-The defaults values for `model` are shown below:
-
-```yaml
-model: claude-sonnet-4-5-20250929
-```
-
-Follow the instructions below to get set up, or pick one of the additional options.
-
-#### Anthropic
-
-To use Anthropic's chat models:
-
-1. Sign up for an [Anthropic API key](https://console.anthropic.com/) if you haven't already.
-2. Once you have your API key, add it to your `.env` file:
+This repo is a simplified version of AskCipher's production backend. In production, three services handle different responsibilities:
 
 ```
-ANTHROPIC_API_KEY=your-api-key
-```
-#### OpenAI
-
-To use OpenAI's chat models:
-
-1. Sign up for an [OpenAI API key](https://platform.openai.com/signup).
-2. Once you have your API key, add it to your `.env` file:
-```
-OPENAI_API_KEY=your-api-key
+Frontend → Server (:8000) → Hinge (:9000) → Pointer (:9001) → External APIs
+                ↓                ↓
+           PostgreSQL (shared database)
 ```
 
-3. Customize whatever you'd like in the code.
-4. Open the folder LangGraph Studio!
+| Service | Role | In This Repo |
+|---------|------|-------------|
+| **Server** | API gateway — auth, validation, proxying | `src/api/` |
+| **Hinge** | AI agent — LangGraph ReAct loop, tools, state | `src/react_agent/` |
+| **Pointer** | Integration hub — external API calls | Tool functions call APIs directly |
 
-## How to customize
+This exercise runs everything in one process but maintains the **code-level separation** between layers.
 
-1. **Add new tools**: Extend the agent's capabilities by adding new tools in [tools.py](./src/react_agent/tools.py). These can be any Python functions that perform specific tasks.
-2. **Select a different model**: We default to Anthropic's Claude 3 Sonnet. You can select a compatible chat model using `provider/model-name` via runtime context. Example: `openai/gpt-4-turbo-preview`.
-3. **Customize the prompt**: We provide a default system prompt in [prompts.py](./src/react_agent/prompts.py). You can easily update this via context in the studio.
+---
 
-You can also quickly extend this template by:
+## How It Works
 
-- Modifying the agent's reasoning process in [graph.py](./src/react_agent/graph.py).
-- Adjusting the ReAct loop or adding additional steps to the agent's decision-making process.
+### The ReAct Agent
 
-## Development
+The agent follows a reasoning loop:
 
-While iterating on your graph, you can edit past state and rerun your app from past states to debug specific nodes. Local changes will be automatically applied via hot reload. Try adding an interrupt before the agent calls tools, updating the default system message in `src/react_agent/context.py` to take on a persona, or adding additional nodes and edges!
+```
+User message → call_model (LLM thinks) → tool calls? → execute tools → call_model → ... → response
+```
 
-Follow up requests will be appended to the same thread. You can create an entirely new thread, clearing previous history, using the `+` button in the top right.
+The graph is defined in `graph.py`:
+```
+__start__ → call_model → [has tool calls?] → tools → call_model → ... → __end__
+```
 
-You can find the latest (under construction) docs on [LangGraph](https://github.com/langchain-ai/langgraph) here, including examples and other references. Using those guides can help you pick the right patterns to adapt here for your use case.
+### State and Reducers
 
-LangGraph Studio also integrates with [LangSmith](https://smith.langchain.com/) for more in-depth tracing and collaboration with teammates.
+The agent carries state throughout a conversation. Key concept: **reducers**.
 
-[^1]: https://python.langchain.com/docs/concepts/#tools
+```python
+# In state.py — a reducer MERGES new values instead of replacing
+def add_search_results(existing, new):
+    existing_queries = {r["query"] for r in existing}
+    return existing + [r for r in new if r["query"] not in existing_queries]
+
+# The field uses the reducer via annotation
+search_results: Annotated[list[dict], add_search_results] = field(default_factory=list)
+```
+
+User context (`user_id`, `org_id`) flows from the API layer into `InputState`, and the agent's tools can read it via `InjectedState`.
+
+### Tools: Two Patterns
+
+**Simple** — returns a string:
+```python
+async def search(query: str) -> str:
+    return results
+```
+
+**Stateful** — returns a `Command` that updates state via reducers:
+```python
+@tool
+async def search_and_store(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    *,
+    state: Annotated[dict, InjectedState],
+) -> Command:
+    results = await do_search(query)
+    return Command(update={
+        "search_results": [{"query": query, "results": results, ...}],
+        "messages": [ToolMessage(content=formatted, tool_call_id=tool_call_id)],
+    })
+```
+
+Study `tools.py` for the complete example.
+
+### API Gateway Pattern
+
+The API layer (`src/api/`) validates requests, passes user context into the agent, and persists results to Postgres. It does **not** contain business logic — that lives in the agent and its tools.
+
+```
+POST /api/v1/chat → validate → invoke agent graph → persist results → respond
+GET  /api/v1/searches/{user_id} → query database → respond
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── api/                          # "Server" — API gateway layer
+│   ├── main.py                   # FastAPI app, lifespan (DB pool), CORS
+│   ├── routes.py                 # Endpoints: /chat, /searches
+│   ├── schemas.py                # Pydantic request/response models
+│   └── database.py               # asyncpg pool + query functions
+│
+├── react_agent/                  # "Hinge" — AI agent layer
+│   ├── graph.py                  # LangGraph StateGraph (ReAct loop)
+│   ├── state.py                  # InputState + State with reducers
+│   ├── tools.py                  # Tool registry (search_and_store)
+│   ├── prompts.py                # System prompt template
+│   ├── context.py                # Runtime config (model, prompt)
+│   └── utils.py                  # Model loader, message text helper
+
+tests/
+├── unit_tests/
+│   ├── test_state.py             # Reducer tests
+│   ├── test_routes.py            # API endpoint tests (mocked deps)
+│   └── test_configuration.py     # Context config tests
+
+docker-compose.yml                # App + Postgres
+Dockerfile                        # Python 3.11 container
+init.sql                          # Database schema
+```
+
+---
+
+## Key Files to Study
+
+| File | What to learn |
+|------|--------------|
+| `src/react_agent/state.py` | How state flows, what reducers do, where user context lives |
+| `src/react_agent/tools.py` | Both tool patterns (simple vs Command), InjectedState, docstrings |
+| `src/react_agent/graph.py` | The ReAct loop, how call_model and tools connect |
+| `src/api/routes.py` | The gateway pattern, how API invokes agent and persists results |
+| `src/api/schemas.py` | Pydantic models for request validation and response formatting |
+| `tests/unit_tests/test_state.py` | How to test reducers (pure functions, no infra needed) |
+| `tests/unit_tests/test_routes.py` | How to test endpoints with mocked agent and database |
+
+---
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/api/v1/chat` | Send message to agent, get response |
+| `GET` | `/api/v1/searches/{user_id}` | Retrieve stored search results |
+
+See full schemas at `http://localhost:8000/docs` when running.
+
+---
+
+## Configuration
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `ANTHROPIC_API_KEY` | Yes | — | Claude API key |
+| `TAVILY_API_KEY` | Yes | — | Tavily search API key |
+| `DATABASE_URL` | No | `postgresql://postgres:postgres@postgres:5432/case_db` | Postgres DSN |
+| `MODEL` | No | `anthropic/claude-sonnet-4-5-20250929` | LLM model to use |
+
+---
+
+## Exercise Instructions
+
+See **INTERVIEW_CASE.md** for the full exercise.
